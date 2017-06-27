@@ -47,11 +47,12 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     }
     
     override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
         print("Non Updated Center: \(timelineViewYCenter)")
         timelineView.center.y = backgroundView.frame.height + timelineView.frame.height / 2
         initialTimelineViewCenterY = timelineViewYCenter
         rangeForTransition = initialTimelineViewCenterY - self.view.center.y
-        timelineViewWidth.constant = self.view.frame.width - 32.0
+        timelineViewWidth.constant = self.view.frame.width - 16.0
         print("Updated Center: \(timelineViewYCenter)")
     }
     
@@ -93,7 +94,6 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         let translation = gestureRecognizer.translation(in: self.view).y
         timelineViewYCenter += translation
         
-        
         if timelineViewYCenter >= initialTimelineViewCenterY {
             timelineViewYCenter = initialTimelineViewCenterY
         } else if timelineViewYCenter <= self.view.center.y {
@@ -111,14 +111,16 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     func moveToTop(view: UIView) {
         UIView.animate(withDuration: 0.3 , delay: 0.0, options: .curveEaseOut, animations: {
             view.center.y = self.view.center.y
-            self.backView.alpha = 1
+            self.updateFrames(withValue: self.timelineViewYCenter)
+            //self.timelineViewWidth.constant = self.view.frame.width
         })
     }
     
     func moveBack(view: UIView) {
         UIView.animate(withDuration: 0.4 , delay: 0.0, options: .curveEaseOut, animations: {
             view.center.y = self.initialTimelineViewCenterY
-            self.backView.alpha = 0
+            self.updateFrames(withValue: self.timelineViewYCenter)
+            //self.timelineViewWidth.constant = self.view.frame.width - 16.0
         })
     }
     

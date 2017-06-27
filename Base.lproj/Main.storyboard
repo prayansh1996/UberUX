@@ -30,7 +30,7 @@
                             </imageView>
                             <view alpha="0.0" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="zZi-e2-l8V">
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
-                                <color key="backgroundColor" red="0.88643461465835571" green="0.52405637502670288" blue="0.051490135490894318" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <color key="backgroundColor" red="0.02527998574078083" green="0.025396073237061501" blue="0.0063148830085992813" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="6Jv-Ic-H9x">
                                 <rect key="frame" x="16" y="460" width="343" height="667"/>
