@@ -14,19 +14,25 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     @IBOutlet var timelineView: UIView!
     @IBOutlet weak var backgroundView: UIImageView!
     @IBOutlet weak var tableV: UITableView!
-    @IBOutlet weak var timelineViewWidth: NSLayoutConstraint!
+    @IBOutlet weak var burgerKingLabel: UILabel!
+    @IBOutlet weak var headerButton: UIButton!
     
     var refreshControl: UIRefreshControl!
     var initialTimelineViewCenterY = CGFloat(0)
+    var initialTimelineViewOriginX = CGFloat(0)
+    var initialTimelineViewWidth = CGFloat(0)
+    var initialBurgerKingCenterX = CGFloat(0)
     var rangeForTransition = CGFloat(0)
+    var paddingFromTop = CGFloat(16)
+    
     
     var isAtTop: Bool {
         get {
-            return timelineViewYCenter == self.view.center.y ? true : false
+            return timelineViewCenterY == self.view.center.y + paddingFromTop ? true : false
         }
     }
     
-    var timelineViewYCenter: CGFloat {
+    var timelineViewCenterY: CGFloat {
         get {
             return timelineView.center.y
         } set {
@@ -35,25 +41,54 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         }
     }
     
-    func updateFrames(withValue value: CGFloat) {
-        backView.alpha = (initialTimelineViewCenterY - value) / (rangeForTransition)
-        //timelineViewWidth.constant = self.view.frame.width - 32 * (timelineViewYCenter - self.view.center.y) / (rangeForTransition)
+    func updateFrames(withValue center: CGFloat) {
+        let transition = (initialTimelineViewCenterY - center) / (rangeForTransition)
+        backView.alpha = transition
+        headerButton.alpha = transition
+        /*
+        let newOrigin = initialTimelineViewOriginX - 8 * transition
+        let newWidth = initialTimelineViewWidth + 16 * transition
+        
+        var frameForTimelineView = self.timelineView.frame
+        var frameForHeaderView = self.timelineView.viewWithTag(101)?.frame
+        var frameForTableView = self.timelineView.viewWithTag(102)?.frame
+
+        frameForTimelineView.origin.x = newOrigin
+        frameForTimelineView.size.width = newWidth
+        self.timelineView.frame = frameForTimelineView
+        
+        frameForHeaderView?.origin.x = newOrigin
+        frameForHeaderView?.size.width = newWidth
+        self.timelineView.viewWithTag(101)?.frame = frameForHeaderView!
+        
+        frameForTableView?.origin.x = newOrigin
+        frameForTableView?.size.width = newWidth
+        self.timelineView.viewWithTag(102)?.frame = frameForTableView!
+        */
+        
+        self.burgerKingLabel.center.x = initialBurgerKingCenterX + transition * (self.view.center.x - initialBurgerKingCenterX) //+ 8.0 * transition
+        //timelineViewWidth.constant = self.view.frame.width - 32 * (timelineViewCenterY - self.view.center.y) / (rangeForTransition)
     }
     
-    var timelineViewYTop: CGFloat {
+    var timelineViewTopY: CGFloat {
         get {
-            return timelineViewYCenter - timelineView.frame.height/2
+            return timelineViewCenterY - timelineView.frame.height/2
         }
     }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        print("Non Updated Center: \(timelineViewYCenter)")
+        print("Non Updated Center: \(timelineViewCenterY)")
         timelineView.center.y = backgroundView.frame.height + timelineView.frame.height / 2
-        initialTimelineViewCenterY = timelineViewYCenter
+        print("Updated Center: \(timelineViewCenterY)")
+        
+        initialTimelineViewCenterY = timelineViewCenterY
+        initialTimelineViewOriginX = timelineView.frame.origin.x
+        initialTimelineViewWidth = timelineView.frame.width
+        
         rangeForTransition = initialTimelineViewCenterY - self.view.center.y
-        timelineViewWidth.constant = self.view.frame.width - 16.0
-        print("Updated Center: \(timelineViewYCenter)")
+        initialBurgerKingCenterX = burgerKingLabel.center.x
+        headerButton.isEnabled = false
     }
     
     override func viewDidLoad() {
@@ -77,12 +112,12 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     
     @IBAction func performPanGesture(_ gestureRecognizer: UIPanGestureRecognizer) {
         
-        //print(timelineViewYCenter)
-        //print("Trigger: \(timelineViewYTop - (self.view.center.y - paddingFromViewsCenter))")
+        //print(timelineViewCenterY)
+        //print("Trigger: \(timelineViewTopY - (self.view.center.y - paddingFromViewsCenter))")
         
         if gestureRecognizer.state == .ended {
-            //print(timelineViewYTop)
-            if timelineViewYTop <= self.view.center.y - paddingFromViewsCenter {
+            //print(timelineViewTopY)
+            if timelineViewTopY <= self.view.center.y - paddingFromViewsCenter {
                 moveToTop(view: timelineView)
             } else {
                 moveBack(view: timelineView)
@@ -92,12 +127,12 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         
         
         let translation = gestureRecognizer.translation(in: self.view).y
-        timelineViewYCenter += translation
+        timelineViewCenterY += translation
         
-        if timelineViewYCenter >= initialTimelineViewCenterY {
-            timelineViewYCenter = initialTimelineViewCenterY
-        } else if timelineViewYCenter <= self.view.center.y {
-            timelineViewYCenter = self.view.center.y
+        if timelineViewCenterY >= initialTimelineViewCenterY {
+            timelineViewCenterY = initialTimelineViewCenterY
+        } else if timelineViewCenterY <= self.view.center.y {
+            timelineViewCenterY = self.view.center.y + paddingFromTop
         }
         gestureRecognizer.setTranslation(CGPoint(x: 0, y: 0), in: self.view)
 
@@ -110,17 +145,17 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     
     func moveToTop(view: UIView) {
         UIView.animate(withDuration: 0.3 , delay: 0.0, options: .curveEaseOut, animations: {
-            view.center.y = self.view.center.y
-            self.updateFrames(withValue: self.timelineViewYCenter)
-            //self.timelineViewWidth.constant = self.view.frame.width
+            view.center.y = self.view.center.y + self.paddingFromTop
+            self.updateFrames(withValue: self.timelineViewCenterY)
+            self.headerButton.isEnabled = true
         })
     }
     
     func moveBack(view: UIView) {
         UIView.animate(withDuration: 0.4 , delay: 0.0, options: .curveEaseOut, animations: {
             view.center.y = self.initialTimelineViewCenterY
-            self.updateFrames(withValue: self.timelineViewYCenter)
-            //self.timelineViewWidth.constant = self.view.frame.width - 16.0
+            self.updateFrames(withValue: self.timelineViewCenterY)
+            self.headerButton.isEnabled = false
         })
     }
     
