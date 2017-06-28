@@ -27,10 +27,12 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     
     var rangeForTransition = CGFloat(0)
     var paddingFromTop = CGFloat(16)
-    var paddingFromLeft = CGFloat(8)
+    var paddingFromLeft = CGFloat(0)
+    let paddingFromViewsCenter = CGFloat(50)
     
     var primaryColor = UIColor(red: 237.0/255.0, green: 120.0/255.0, blue: 0.0, alpha: 1)
     
+    //is Timeline View at top
     var isAtTop: Bool {
         get {
             return timelineViewCenterY == self.view.center.y + paddingFromTop ? true : false
@@ -46,19 +48,27 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         }
     }
     
+    var timelineViewTopY: CGFloat {
+        get {
+            return timelineView.frame.origin.y
+        }
+    }
+    
+    //Do all the animations
     func updateFrames(withValue center: CGFloat) {
         let transition = (initialTimelineViewCenterY - center) / (rangeForTransition)
         let invTransition = 1 - transition
         backView.alpha = transition
-        headerButton.alpha = transition
+        //headerButton.alpha = transition
         
         let primaryToWhite = UIColor(red:(237.0+(255.0-237.0)*transition)/255.0, green:(120.0+(255.0-120.0)*transition)/255.0, blue: transition, alpha: 1)
         let whiteToPrimary = UIColor(red:(237.0+(255.0-237.0)*invTransition)/255.0, green:(120.0+(255.0-120.0)*invTransition)/255.0, blue: invTransition, alpha: 1)
+        
         headerView.backgroundColor = whiteToPrimary
         burgerKingLabel.textColor = primaryToWhite
         self.burgerKingLabel.center.x = initialBurgerKingCenterX + transition * (self.view.center.x - paddingFromLeft - initialBurgerKingCenterX)
         
-        let newOrigin = initialTimelineViewOriginX - paddingFromLeft * transition - paddingFromLeft
+        let newOrigin = initialTimelineViewOriginX - (paddingFromLeft * transition) - paddingFromLeft
         let newWidth = initialTimelineViewWidth + (2 * paddingFromLeft) * transition
         tableV.frame.origin.x = newOrigin
         tableV.frame.size.width = newWidth
@@ -66,32 +76,30 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         let transformScale = (2 * paddingFromLeft) / initialHeaderViewWidth
         headerView.transform = CGAffineTransform.identity
         headerView.transform = CGAffineTransform(scaleX: 1 + transition * transformScale, y: 1.0)
-        print("Absolute Scale: \(transformScale)\nTransition:\(transition)\nTransform Scale:\(transformScale * transition)")
-    }
-
-    var timelineViewTopY: CGFloat {
-        get {
-            return timelineView.frame.origin.y
-        }
+        //print("Absolute Scale: \(transformScale)\nTransition:\(transition)\nTransform Scale:\(transformScale * transition)")
     }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        print("Non Updated Center: \(timelineViewCenterY)")
+        //print("Non Updated Center: \(timelineViewCenterY)")
         timelineView.center.y = backgroundView.frame.height + timelineView.frame.height / 2
-        print("Updated Center: \(timelineViewCenterY)")
+        //print("Updated Center: \(timelineViewCenterY)")
         
         initialTimelineViewCenterY = timelineViewCenterY
         initialTimelineViewOriginX = timelineView.frame.origin.x
         initialTimelineViewWidth = timelineView.frame.width
-        rangeForTransition = initialTimelineViewCenterY - (self.view.center.y + paddingFromTop)
         initialBurgerKingCenterX = burgerKingLabel.center.x
         initialHeaderViewWidth = headerView.frame.width
-        headerView.backgroundColor = UIColor.clear
+        
+        rangeForTransition = initialTimelineViewCenterY - (self.view.center.y + paddingFromTop)
         backView.backgroundColor = primaryColor
         burgerKingLabel.textColor = primaryColor
+        
+        headerView.backgroundColor = UIColor.white
         headerButton.isEnabled = false
         headerButton.alpha = 0
+        
+        paddingFromLeft = (self.view.frame.width - timelineView.frame.width) / 2
     }
     
     override func viewDidLoad() {
@@ -102,8 +110,6 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         refreshControl.addTarget(self, action: #selector(ViewController.refresh), for: UIControlEvents.valueChanged)
         tableV.addSubview(refreshControl)
     }
-
-    let paddingFromViewsCenter = CGFloat(50)
     
     @IBAction func didTapOnTimelineHeader(_ sender: UITapGestureRecognizer) {
         if isAtTop {
@@ -151,7 +157,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         UIView.animate(withDuration: 0.3 , delay: 0.0, options: .curveEaseOut, animations: {
             view.center.y = self.view.center.y + self.paddingFromTop
             self.updateFrames(withValue: self.timelineViewCenterY)
-            self.headerButton.isEnabled = true
+            //self.headerButton.isEnabled = true
         })
     }
     
@@ -183,7 +189,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
 
 
 
- 
+
 
 //+ 8.0 * transition
 //timelineViewWidth.constant = self.view.frame.width - 32 * (timelineViewCenterY - self.view.center.y) / (rangeForTransition)
