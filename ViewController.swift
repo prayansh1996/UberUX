@@ -17,15 +17,18 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     @IBOutlet weak var burgerKingLabel: UILabel!
     @IBOutlet weak var headerButton: UIButton!
     @IBOutlet weak var headerView: UIView!
-    
     var refreshControl: UIRefreshControl!
+    
     var initialTimelineViewCenterY = CGFloat(0)
     var initialTimelineViewOriginX = CGFloat(0)
     var initialTimelineViewWidth = CGFloat(0)
     var initialBurgerKingCenterX = CGFloat(0)
     var initialHeaderViewWidth = CGFloat(0)
+    
     var rangeForTransition = CGFloat(0)
     var paddingFromTop = CGFloat(16)
+    var paddingFromLeft = CGFloat(8)
+    
     var primaryColor = UIColor(red: 237.0/255.0, green: 120.0/255.0, blue: 0.0, alpha: 1)
     
     var isAtTop: Bool {
@@ -53,14 +56,14 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         let whiteToPrimary = UIColor(red:(237.0+(255.0-237.0)*invTransition)/255.0, green:(120.0+(255.0-120.0)*invTransition)/255.0, blue: invTransition, alpha: 1)
         headerView.backgroundColor = whiteToPrimary
         burgerKingLabel.textColor = primaryToWhite
-        self.burgerKingLabel.center.x = initialBurgerKingCenterX + transition * (self.view.center.x - 8.0 - initialBurgerKingCenterX)
+        self.burgerKingLabel.center.x = initialBurgerKingCenterX + transition * (self.view.center.x - paddingFromLeft - initialBurgerKingCenterX)
         
-        let newOrigin = initialTimelineViewOriginX - 8 * transition - 8
-        let newWidth = initialTimelineViewWidth + 16 * transition
+        let newOrigin = initialTimelineViewOriginX - paddingFromLeft * transition - paddingFromLeft
+        let newWidth = initialTimelineViewWidth + (2 * paddingFromLeft) * transition
         tableV.frame.origin.x = newOrigin
         tableV.frame.size.width = newWidth
         
-        let transformScale = 16 / initialHeaderViewWidth
+        let transformScale = (2 * paddingFromLeft) / initialHeaderViewWidth
         headerView.transform = CGAffineTransform.identity
         headerView.transform = CGAffineTransform(scaleX: 1 + transition * transformScale, y: 1.0)
         print("Absolute Scale: \(transformScale)\nTransition:\(transition)\nTransform Scale:\(transformScale * transition)")
@@ -180,7 +183,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
 
 
 
-
+ 
 
 //+ 8.0 * transition
 //timelineViewWidth.constant = self.view.frame.width - 32 * (timelineViewCenterY - self.view.center.y) / (rangeForTransition)
