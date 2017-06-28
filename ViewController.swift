@@ -12,10 +12,11 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
 
     @IBOutlet var backView: UIView!
     @IBOutlet var timelineView: UIView!
-    @IBOutlet weak var backgroundView: UIImageView!
+    @IBOutlet weak var backgroundView: UIImageView! //Background Image View
     @IBOutlet weak var tableV: UITableView!
     @IBOutlet weak var burgerKingLabel: UILabel!
     @IBOutlet weak var headerButton: UIButton!
+    @IBOutlet weak var headerView: UIView!
     
     var refreshControl: UIRefreshControl!
     var initialTimelineViewCenterY = CGFloat(0)
@@ -24,7 +25,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     var initialBurgerKingCenterX = CGFloat(0)
     var rangeForTransition = CGFloat(0)
     var paddingFromTop = CGFloat(16)
-    
+    var primaryColor = UIColor(red: 237.0/255.0, green: 120.0/255.0, blue: 0.0, alpha: 1)
     
     var isAtTop: Bool {
         get {
@@ -43,36 +44,30 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     
     func updateFrames(withValue center: CGFloat) {
         let transition = (initialTimelineViewCenterY - center) / (rangeForTransition)
+        let invTransition = 1 - transition
         backView.alpha = transition
         headerButton.alpha = transition
-        /*
-        let newOrigin = initialTimelineViewOriginX - 8 * transition
-        let newWidth = initialTimelineViewWidth + 16 * transition
         
-        var frameForTimelineView = self.timelineView.frame
-        var frameForHeaderView = self.timelineView.viewWithTag(101)?.frame
-        var frameForTableView = self.timelineView.viewWithTag(102)?.frame
+        let primaryToWhite = UIColor(red:(237.0+(255.0-237.0)*transition)/255.0, green:(120.0+(255.0-120.0)*transition)/255.0, blue: transition, alpha: 1)
+        let whiteToPrimary = UIColor(red:(237.0+(255.0-237.0)*invTransition)/255.0, green:(120.0+(255.0-120.0)*invTransition)/255.0, blue: invTransition, alpha: 1)
+        headerView.backgroundColor = whiteToPrimary
+        burgerKingLabel.textColor = primaryToWhite
+        self.burgerKingLabel.center.x = initialBurgerKingCenterX + transition * (self.view.center.x - initialBurgerKingCenterX)
+        
+//        let newOrigin = initialTimelineViewOriginX - 16 * transition
+//        let newWidth = initialTimelineViewWidth + 16 * transition
+//        var frameForTableView = self.timelineView.viewWithTag(102)?.frame
+//        
+//        frameForTableView?.size.width = newWidth
+//        frameForTableView?.origin.x = newOrigin
+//        self.timelineView.viewWithTag(102)?.frame = frameForTableView!
 
-        frameForTimelineView.origin.x = newOrigin
-        frameForTimelineView.size.width = newWidth
-        self.timelineView.frame = frameForTimelineView
-        
-        frameForHeaderView?.origin.x = newOrigin
-        frameForHeaderView?.size.width = newWidth
-        self.timelineView.viewWithTag(101)?.frame = frameForHeaderView!
-        
-        frameForTableView?.origin.x = newOrigin
-        frameForTableView?.size.width = newWidth
-        self.timelineView.viewWithTag(102)?.frame = frameForTableView!
-        */
-        
-        self.burgerKingLabel.center.x = initialBurgerKingCenterX + transition * (self.view.center.x - initialBurgerKingCenterX) //+ 8.0 * transition
-        //timelineViewWidth.constant = self.view.frame.width - 32 * (timelineViewCenterY - self.view.center.y) / (rangeForTransition)
     }
     
+    //r 237 g 120 b 0
     var timelineViewTopY: CGFloat {
         get {
-            return timelineViewCenterY - timelineView.frame.height/2
+            return timelineView.frame.origin.y
         }
     }
     
@@ -85,10 +80,16 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         initialTimelineViewCenterY = timelineViewCenterY
         initialTimelineViewOriginX = timelineView.frame.origin.x
         initialTimelineViewWidth = timelineView.frame.width
+        rangeForTransition = initialTimelineViewCenterY - (self.view.center.y + paddingFromTop)
         
-        rangeForTransition = initialTimelineViewCenterY - self.view.center.y
         initialBurgerKingCenterX = burgerKingLabel.center.x
+        headerView.backgroundColor = UIColor.clear
+        backView.backgroundColor = primaryColor
+        burgerKingLabel.textColor = primaryColor
         headerButton.isEnabled = false
+        headerButton.alpha = 0
+        
+//        tableV.frame.origin.x = 8
     }
     
     override func viewDidLoad() {
@@ -97,7 +98,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         refreshControl = UIRefreshControl()
         refreshControl.tintColor = UIColor.clear
         refreshControl.addTarget(self, action: #selector(ViewController.refresh), for: UIControlEvents.valueChanged)
-        tableV.addSubview(refreshControl) // not required when using UITableViewController
+        tableV.addSubview(refreshControl)
     }
 
     let paddingFromViewsCenter = CGFloat(50)
@@ -140,6 +141,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     
     func refresh() {
         moveBack(view: timelineView)
+        tableV.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
         refreshControl.endRefreshing()
     }
     
@@ -165,18 +167,46 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 10
+        return 5
     }
+    
+    let namesOfItems = ["Burgers", "Wraps", "Shakes", "Drinks", "Ice Cream"]
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        cell.textLabel?.text = "Cell: \(indexPath.row)"
+        cell.textLabel?.text = namesOfItems[indexPath.row]
         return cell
     }
 }
 
 
 
+
+
+//+ 8.0 * transition
+//timelineViewWidth.constant = self.view.frame.width - 32 * (timelineViewCenterY - self.view.center.y) / (rangeForTransition)
+//burgerKingLabel.center.x = 8 + burgerKingLabel.frame.width / 2
+
+/*
+ let newOrigin = initialTimelineViewOriginX - 8 * transition
+ let newWidth = initialTimelineViewWidth + 16 * transition
+ 
+ var frameForTimelineView = self.timelineView.frame
+ var frameForHeaderView = self.timelineView.viewWithTag(101)?.frame
+ var frameForTableView = self.timelineView.viewWithTag(102)?.frame
+ 
+ frameForTimelineView.size.width = newWidth
+ frameForTimelineView.origin.x = newOrigin
+ self.timelineView.frame = frameForTimelineView
+ 
+ frameForHeaderView?.size.width = newWidth
+ frameForHeaderView?.origin.x = newOrigin
+ self.timelineView.viewWithTag(101)?.frame = frameForHeaderView!
+ 
+ frameForTableView?.size.width = newWidth
+ frameForTableView?.origin.x = newOrigin
+ self.timelineView.viewWithTag(102)?.frame = frameForTableView!
+ */
 
 
 
