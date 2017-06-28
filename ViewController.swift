@@ -23,6 +23,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     var initialTimelineViewOriginX = CGFloat(0)
     var initialTimelineViewWidth = CGFloat(0)
     var initialBurgerKingCenterX = CGFloat(0)
+    var initialHeaderViewWidth = CGFloat(0)
     var rangeForTransition = CGFloat(0)
     var paddingFromTop = CGFloat(16)
     var primaryColor = UIColor(red: 237.0/255.0, green: 120.0/255.0, blue: 0.0, alpha: 1)
@@ -52,19 +53,19 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         let whiteToPrimary = UIColor(red:(237.0+(255.0-237.0)*invTransition)/255.0, green:(120.0+(255.0-120.0)*invTransition)/255.0, blue: invTransition, alpha: 1)
         headerView.backgroundColor = whiteToPrimary
         burgerKingLabel.textColor = primaryToWhite
-        self.burgerKingLabel.center.x = initialBurgerKingCenterX + transition * (self.view.center.x - initialBurgerKingCenterX)
+        self.burgerKingLabel.center.x = initialBurgerKingCenterX + transition * (self.view.center.x - 8.0 - initialBurgerKingCenterX)
         
-//        let newOrigin = initialTimelineViewOriginX - 16 * transition
-//        let newWidth = initialTimelineViewWidth + 16 * transition
-//        var frameForTableView = self.timelineView.viewWithTag(102)?.frame
-//        
-//        frameForTableView?.size.width = newWidth
-//        frameForTableView?.origin.x = newOrigin
-//        self.timelineView.viewWithTag(102)?.frame = frameForTableView!
-
+        let newOrigin = initialTimelineViewOriginX - 8 * transition - 8
+        let newWidth = initialTimelineViewWidth + 16 * transition
+        tableV.frame.origin.x = newOrigin
+        tableV.frame.size.width = newWidth
+        
+        let transformScale = 16 / initialHeaderViewWidth
+        headerView.transform = CGAffineTransform.identity
+        headerView.transform = CGAffineTransform(scaleX: 1 + transition * transformScale, y: 1.0)
+        print("Absolute Scale: \(transformScale)\nTransition:\(transition)\nTransform Scale:\(transformScale * transition)")
     }
-    
-    //r 237 g 120 b 0
+
     var timelineViewTopY: CGFloat {
         get {
             return timelineView.frame.origin.y
@@ -81,15 +82,13 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         initialTimelineViewOriginX = timelineView.frame.origin.x
         initialTimelineViewWidth = timelineView.frame.width
         rangeForTransition = initialTimelineViewCenterY - (self.view.center.y + paddingFromTop)
-        
         initialBurgerKingCenterX = burgerKingLabel.center.x
+        initialHeaderViewWidth = headerView.frame.width
         headerView.backgroundColor = UIColor.clear
         backView.backgroundColor = primaryColor
         burgerKingLabel.textColor = primaryColor
         headerButton.isEnabled = false
         headerButton.alpha = 0
-        
-//        tableV.frame.origin.x = 8
     }
     
     override func viewDidLoad() {
